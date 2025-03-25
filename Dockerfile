@@ -10,28 +10,22 @@ RUN apt-get update && apt-get install -y \
 # Cài đặt Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Thiết lập thư mục làm việc đúng
+# Thiết lập thư mục làm việc
 WORKDIR /var/www/html
 
-# Copy toàn bộ project Laravel vào thư mục đúng
+# Copy toàn bộ project Laravel vào container
 COPY . .
 
-# Cấp quyền cho thư mục storage và bootstrap/cache
-RUN chmod -R 777 storage bootstrap/cache
+# Copy file cấu hình Apache
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Cài đặt Apache để trỏ đúng vào thư mục public
-RUN echo '<VirtualHost *:80>
-    DocumentRoot "/var/www/html/public"
-    <Directory "/var/www/html/public">
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+# Cấp quyền cho storage và bootstrap/cache
+RUN chmod -R 777 storage bootstrap/cache
 
 # Kích hoạt mod_rewrite của Apache (cần thiết cho Laravel)
 RUN a2enmod rewrite
 
-# Restart Apache để áp dụng cấu hình
+# Restart Apache để áp dụng cấu hình mới
 RUN service apache2 restart
 
 # Cài đặt các thư viện PHP của Laravel
