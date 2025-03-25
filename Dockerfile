@@ -20,16 +20,19 @@ COPY . .
 RUN chmod -R 777 storage bootstrap/cache
 
 # Cài đặt Apache để trỏ đúng vào thư mục public
-RUN echo "<VirtualHost *:80>
-    DocumentRoot /var/www/html/public
-    <Directory /var/www/html/public>
+RUN echo '<VirtualHost *:80>
+    DocumentRoot "/var/www/html/public"
+    <Directory "/var/www/html/public">
         AllowOverride All
         Require all granted
     </Directory>
-</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
 # Kích hoạt mod_rewrite của Apache (cần thiết cho Laravel)
 RUN a2enmod rewrite
+
+# Restart Apache để áp dụng cấu hình
+RUN service apache2 restart
 
 # Cài đặt các thư viện PHP của Laravel
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
